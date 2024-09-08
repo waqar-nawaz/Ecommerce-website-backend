@@ -16,7 +16,7 @@ route.post("/product", isAuth, [
     validation("description", 5),
 
 ], prodcutController.addProduct);
-route.get("/product", isAuth, prodcutController.getProduct);
+route.get("/product", prodcutController.getProduct);
 
 
 
