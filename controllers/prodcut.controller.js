@@ -1,5 +1,4 @@
 const product = require("../models/product.model");
-const { validationResult } = require("express-validator");
 const User = require("../models/user.model");
 const clearImage = require('../utils/clearImage')
 
@@ -75,11 +74,7 @@ exports.getProductById = async (req, res, next) => {
 };
 
 exports.updateProduct = async (req, res, next) => {
-    const error = validationResult(req);
 
-    if (!error.isEmpty()) {
-        return res.status(400).json({ message: error.array()[0].msg });
-    }
 
     try {
         const { name, price, description, stock, brand, category, sku } = req.body;

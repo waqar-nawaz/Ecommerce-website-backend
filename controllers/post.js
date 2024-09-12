@@ -1,4 +1,3 @@
-const { validationResult } = require("express-validator");
 const fs = require("fs");
 const path = require("path");
 const fullpath = path.join(__dirname, "../data.json");
@@ -40,37 +39,40 @@ exports.getPost = async (req, res, next) => {
 };
 
 // Product creation function
-exports.createPost = (req, res, next) => {
-  const error = validationResult(req);
+exports.createPost = async (req, res, next) => {
+  try {
+    const { title, price, description } = req.body;
+    const file = req.file?.path;
 
-  if (!error.isEmpty()) {
-    return res.status(400).json({ message: error.array()[0].msg });
+    // Check if a file was uploaded
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    // Validate the request body (this will already be done by the middleware)
+    let data = {
+      title,
+      price,
+      imageUrl: file,
+      description,
+      userId: req.userId,
+    };
+
+    // Create the product
+    const post = await product.create(data);
+
+    // Find the user and push the product ID (Mongoose automatically stores just the reference)
+    const user = await user.findById(req.userId);
+    user.post.push(post._id); // Push only the post's ID, not the whole object
+    await user.save();
+
+    // Respond with success
+    return res.status(201).json({ message: "Product created successfully", data });
+  } catch (error) {
+    next(error); // Pass errors to the global error handler
   }
-  const { title, price, description } = req.body;
-  let file = req.file?.path;
-  let data = { title, price, imageUrl: file, description, userId: req.userId };
-  if (!file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
-  product
-    .create(data)
-    .then((post) => {
-      user
-        .findById(req.userId)
-        .then((user) => {
-          user.post.push(post); // here i am pushing full object but mongoose is genise it store only product id data db
-          return user.save();
-        })
-        .then((result) => {
-          return res
-            .status(201)
-            .json({ message: "Prodcut Create Successfully", data: data });
-        });
-    })
-    .catch((err) => {
-      next(err);
-    });
 };
+
 
 // Product update operations
 exports.updatePost = (req, res, next) => {
