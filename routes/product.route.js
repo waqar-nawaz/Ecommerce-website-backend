@@ -11,7 +11,7 @@ const validateRequest = require('../middleware/validateRequest');
 
 
 route.post("/product", isAuth, validateRequest(productsSchema), prodcutController.addProduct);
-route.get("/product", prodcutController.getProduct);
+route.get("/product", isAuth, prodcutController.getProduct);
 
 
 
