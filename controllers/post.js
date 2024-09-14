@@ -17,9 +17,10 @@ exports.getPost = async (req, res, next) => {
 
     // Fetch paginated data
     const data = await product
-      .find().populate({
-        path: 'userId',   // Field to populate
-        select: '-password -post -__v'
+      .find()
+      .populate({
+        path: "userId", // Field to populate
+        select: "-password -post -__v",
       })
       .skip(pagination.skip)
       .limit(pagination.perPage);
@@ -67,21 +68,16 @@ exports.createPost = async (req, res, next) => {
     await user.save();
 
     // Respond with success
-    return res.status(201).json({ message: "Product created successfully", data });
+    return res
+      .status(201)
+      .json({ message: "Product created successfully", data });
   } catch (error) {
     next(error); // Pass errors to the global error handler
   }
 };
 
-
 // Product update operations
 exports.updatePost = (req, res, next) => {
-  const error = validationResult(req);
-
-  if (!error.isEmpty()) {
-    return res.status(400).json({ message: error.array()[0].msg });
-  }
-
   const { title, price, description } = req.body;
   let file = req.file ? req.file.path : req.body.imageUrl;
   let data = { title, price, imageUrl: file, description };
@@ -144,7 +140,7 @@ exports.deletePost = async (req, res, next) => {
 //find search by name
 exports.postSearch = async (req, res, next) => {
   const name = req.query.search.trim();
-  let result
+  let result;
   if (!name) {
     result = await product.find();
   }
@@ -164,20 +160,17 @@ exports.postSearch = async (req, res, next) => {
 };
 
 exports.getProductById = async (req, res, next) => {
-  const id = req.params.id
+  const id = req.params.id;
   console.log(id);
 
   try {
-
-    const result = await product.findById(id)
+    const result = await product.findById(id);
     if (!result) {
-      throw new Error("Product not found")
+      throw new Error("Product not found");
     }
 
-    res.status(200).json({ result })
+    res.status(200).json({ result });
   } catch (error) {
-    next(error)
+    next(error);
   }
-
-
-}
+};
