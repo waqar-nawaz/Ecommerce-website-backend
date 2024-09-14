@@ -1,10 +1,10 @@
 const fs = require("fs");
 const path = require("path");
-const fullpath = path.join(__dirname, "../data.json");
 const product = require("../models/products.model");
 const clearImage = require("../utils/clearImage");
 const paginate = require("../utils/generic.pagination");
-const user = require("../models/user.model");
+const User = require("../models/user.model");
+const io = require("../socket.io");
 
 exports.getPost = async (req, res, next) => {
   try {
@@ -61,17 +61,23 @@ exports.createPost = async (req, res, next) => {
 
     // Create the product
     const post = await product.create(data);
-
     // Find the user and push the product ID (Mongoose automatically stores just the reference)
-    const user = await user.findById(req.userId);
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
     user.post.push(post._id); // Push only the post's ID, not the whole object
     await user.save();
+
+    // Emit the event to all connected clients
+    io.getIO().emit("posts", { action: "create", result: post });
 
     // Respond with success
     return res
       .status(201)
-      .json({ message: "Product created successfully", data });
+      .json({ message: "Product created successfully", result: post });
   } catch (error) {
+    console.log(error);
     next(error); // Pass errors to the global error handler
   }
 };
@@ -109,7 +115,7 @@ exports.updatePost = (req, res, next) => {
 
       return res
         .status(200)
-        .json({ message: "Product updated successfully", data: data });
+        .json({ message: "Product updated successfully", result: data });
     })
     .catch((err) => {
       next(err);

@@ -6,25 +6,28 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const path = require("path");
 const upload = require("./utils/imageUpload");
-const corse = require("./utils/cors");
+const cors = require("cors");
 const authroute = require("./routes/auth.route");
 const productroute = require("./routes/product.route");
 
-// CORS Headers Middleware
-app.use(corse.corsFun);
+const socket = require("./socket.io");
 
-// Body Parser Middleware - Should be applied before multer
-app.use(bodyParser.json());
+// CORS Middleware
+app.use(cors());
+app.options("*", cors()); // Handle preflight CORS requests
 
-// Multer Middleware for handling file uploads
+// Multer Middleware for handling file uploads (put this before bodyParser)
 app.use(upload.single("imageUrl"));
+
+// Body Parser Middleware
+app.use(bodyParser.json());
 
 // Routes
 app.use("/api", productroute);
 app.use("/feed", routes);
 app.use("/auth", authroute);
 
-// Static Files Middleware for serving images
+// Static Files Middleware
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 // Error Handling Middleware
@@ -37,11 +40,13 @@ mongoose
   .connect(process.env.MONGO_URL)
   .then(() => {
     const server = app.listen(process.env.PORT);
-    const socket = require("socket.io")(server);
+    const io = require("./socket.io").init(server);
 
-    socket.on("connection", (socket) => {
-      console.log("Client Connected", socket.id);
+    io.on("connection", (socket) => {
+      // console.log("Client Connected", socket.id);
     });
+
+    //
 
     console.log(`Server is running on port ${process.env.PORT}`);
   })

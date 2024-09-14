@@ -7,7 +7,7 @@ exports.singup = async (req, res, next) => {
   try {
     const { email, name, password, status } = req.body;
 
-    const isEmail = User.findOne({ email });
+    const isEmail = await User.findOne({ email });
     if (isEmail) {
       return res.status(400).json({ message: "User already exists" });
     }

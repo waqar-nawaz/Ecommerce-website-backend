@@ -6,10 +6,8 @@ const clearImage = (filePath) => {
   if (fs.existsSync(filePath)) {
     fs.unlink(filePath, (err) => {
       if (err) throw err;
-      console.log("File deleted successfully!");
     });
   } else {
-    console.log("File does not exist at the given path.");
   }
 };
 
