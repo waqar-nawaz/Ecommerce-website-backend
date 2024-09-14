@@ -3,10 +3,6 @@ const User = require("../models/user.model");
 const clearImage = require("../utils/clearImage");
 
 exports.addProduct = async (req, res, next) => {
-  if (!error.isEmpty()) {
-    return res.status(400).json({ message: error.array()[0].msg });
-  }
-
   try {
     const { name, price, description, stock, brand, category, sku } = req.body;
 

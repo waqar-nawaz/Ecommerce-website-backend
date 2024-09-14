@@ -33,9 +33,6 @@ exports.singup = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-  if (!error.isEmpty()) {
-    return res.status(400).json({ message: error.array()[0].msg });
-  }
   const { email, password } = req.body;
 
   try {
