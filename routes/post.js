@@ -3,10 +3,15 @@ const route = express.Router();
 const feedController = require("../controllers/post");
 const prodcutController = require("../controllers/prodcut.controller");
 const isAuth = require("../middleware/is-auth");
-const validateRequest = require('../middleware/validateRequest');
-const productSchema = require('../validation/product.shcema');
+const validateRequest = require("../middleware/validateRequest");
+const productSchema = require("../validation.Schemas/product.shcema");
 
-route.post("/post", isAuth, validateRequest(productSchema), feedController.createPost);
+route.post(
+  "/post",
+  isAuth,
+  validateRequest(productSchema),
+  feedController.createPost
+);
 route.put("/post/:id", isAuth, feedController.updatePost);
 route.delete("/post/:id", isAuth, feedController.deletePost);
 route.get("/post/search", isAuth, feedController.postSearch);
