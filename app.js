@@ -8,7 +8,7 @@ const path = require("path");
 const upload = require("./utils/imageUpload");
 const corse = require("./utils/cors");
 const authroute = require("./routes/auth.route");
-const productroute = require("./routes/product.route")
+const productroute = require("./routes/product.route");
 
 // CORS Headers Middleware
 app.use(corse.corsFun);
@@ -36,7 +36,13 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(process.env.MONGO_URL)
   .then(() => {
-    app.listen(process.env.PORT);
+    const server = app.listen(process.env.PORT);
+    const socket = require("socket.io")(server);
+
+    socket.on("connection", (socket) => {
+      console.log("Client Connected", socket.id);
+    });
+
     console.log(`Server is running on port ${process.env.PORT}`);
   })
   .catch((err) => {
