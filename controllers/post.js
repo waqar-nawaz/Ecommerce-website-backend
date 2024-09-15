@@ -113,6 +113,8 @@ exports.updatePost = (req, res, next) => {
         return res.status(404).json({ message: "Product not found" });
       }
 
+      io.getIO().emit("posts", { action: "update", result: data });
+
       return res
         .status(200)
         .json({ message: "Product updated successfully", result: data });
@@ -135,6 +137,8 @@ exports.deletePost = async (req, res, next) => {
       return post;
     })
     .then((post) => {
+      io.getIO().emit("posts", { action: "delete", result: post });
+
       clearImage(post.imageUrl);
       return res.status(200).json({ message: "Product deleted successfully" });
     })
