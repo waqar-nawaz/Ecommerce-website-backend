@@ -5,6 +5,7 @@ const clearImage = require("../utils/clearImage");
 const paginate = require("../utils/generic.pagination");
 const User = require("../models/user.model");
 const io = require("../socket.io");
+const cloudinary = require("../utils/cloudinary");
 
 exports.getPost = async (req, res, next) => {
   try {
@@ -50,11 +51,21 @@ exports.createPost = async (req, res, next) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    // Await the cloudinary upload result
+    const uploadResult = await cloudinary.cloudinary(file);
+
+    // Log the image URL from the upload result
+    // console.log("Image URL Here", uploadResult.secure_url);
+
+    if (!uploadResult) {
+      return res.status(500).json({ message: "Failed to upload image" });
+    }
+
     // Validate the request body (this will already be done by the middleware)
     let data = {
       title,
       price,
-      imageUrl: file,
+      imageUrl: uploadResult,
       description,
       userId: req.userId,
     };
@@ -83,13 +94,18 @@ exports.createPost = async (req, res, next) => {
 };
 
 // Product update operations
-exports.updatePost = (req, res, next) => {
+exports.updatePost = async (req, res, next) => {
   const { title, price, description } = req.body;
   let file = req.file ? req.file.path : req.body.imageUrl;
-  let data = { title, price, imageUrl: file, description };
   if (!file) {
     return res.status(400).json({ message: "No file uploaded" });
   }
+
+  if (req.file) {
+    file = await cloudinary.cloudinary(file);
+  }
+
+  // Log the image URL from the upload result
 
   const id = req.params.id;
   product
@@ -105,6 +121,8 @@ exports.updatePost = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
+
+  let data = { title, price, imageUrl: file, description };
 
   product
     .findByIdAndUpdate(id, data, { new: true })
@@ -171,7 +189,7 @@ exports.postSearch = async (req, res, next) => {
 
 exports.getProductById = async (req, res, next) => {
   const id = req.params.id;
-  console.log(id);
+  // console.log(id);
 
   try {
     const result = await product.findById(id);
