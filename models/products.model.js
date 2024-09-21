@@ -16,6 +16,11 @@ const productShema = new Schema({
     required: true,
   },
 
+  imagePublicId: {
+    type: String,
+    required: true,
+  },
+
   description: {
     type: String,
     required: true,
@@ -29,4 +34,3 @@ const productShema = new Schema({
 });
 
 module.exports = mongoose.model("Products", productShema);
-

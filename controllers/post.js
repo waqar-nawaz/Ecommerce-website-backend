@@ -5,7 +5,7 @@ const clearImage = require("../utils/clearImage");
 const paginate = require("../utils/generic.pagination");
 const User = require("../models/user.model");
 const io = require("../socket.io");
-const cloudinary = require("../utils/cloudinary");
+const { uploadImage, deleteImage } = require("../utils/cloudinary");
 
 exports.getPost = async (req, res, next) => {
   try {
@@ -52,7 +52,7 @@ exports.createPost = async (req, res, next) => {
     }
 
     // Await the cloudinary upload result
-    const uploadResult = await cloudinary.cloudinary(file);
+    const uploadResult = await uploadImage(file);
 
     // Log the image URL from the upload result
     // console.log("Image URL Here", uploadResult.secure_url);
@@ -65,7 +65,8 @@ exports.createPost = async (req, res, next) => {
     let data = {
       title,
       price,
-      imageUrl: uploadResult,
+      imageUrl: uploadResult.url,
+      imagePublicId: uploadResult.public_id,
       description,
       userId: req.userId,
     };
@@ -95,51 +96,48 @@ exports.createPost = async (req, res, next) => {
 
 // Product update operations
 exports.updatePost = async (req, res, next) => {
-  const { title, price, description } = req.body;
-  let file = req.file ? req.file.path : req.body.imageUrl;
-  if (!file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
+  try {
+    let { title, price, description, imagePublicId } = req.body;
+    let file = req.file ? req.file.path : req.body.imageUrl;
 
-  if (req.file) {
-    file = await cloudinary.cloudinary(file);
-  }
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
 
-  // Log the image URL from the upload result
+    if (req.file) {
+      const uploadResult = await uploadImage(file);
+      imagePublicId = uploadResult.public_id;
+      file = uploadResult.url;
+    }
 
-  const id = req.params.id;
-  product
-    .findById(id)
-    .then((post) => {
-      if (!post) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-      if (req.file) {
-        clearImage(post.imageUrl);
-      }
-    })
-    .catch((err) => {
-      next(err);
+    const id = req.params.id;
+    const post = await product.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (req.file) {
+      await deleteImage(post.imagePublicId);
+    }
+
+    const data = { title, price, imageUrl: file, description, imagePublicId };
+    const updatedPost = await product.findByIdAndUpdate(id, data, {
+      new: true,
     });
 
-  let data = { title, price, imageUrl: file, description };
+    if (!updatedPost) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
-  product
-    .findByIdAndUpdate(id, data, { new: true })
-    .then((data) => {
-      if (!data) {
-        return res.status(404).json({ message: "Product not found" });
-      }
+    io.getIO().emit("posts", { action: "update", result: updatedPost });
 
-      io.getIO().emit("posts", { action: "update", result: data });
-
-      return res
-        .status(200)
-        .json({ message: "Product updated successfully", result: data });
-    })
-    .catch((err) => {
-      next(err);
-    });
+    return res
+      .status(200)
+      .json({ message: "Product updated successfully", result: updatedPost });
+  } catch (err) {
+    next(err);
+  }
 };
 
 // product Delete Operation
@@ -158,6 +156,8 @@ exports.deletePost = async (req, res, next) => {
       io.getIO().emit("posts", { action: "delete", result: post });
 
       clearImage(post.imageUrl);
+      deleteImage(post.imagePublicId);
+
       return res.status(200).json({ message: "Product deleted successfully" });
     })
     .catch((err) => {
