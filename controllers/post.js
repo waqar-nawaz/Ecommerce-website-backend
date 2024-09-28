@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const product = require("../models/products.model");
+const product = require("../models/post.model");
 const clearImage = require("../utils/clearImage");
 const paginate = require("../utils/generic.pagination");
 const User = require("../models/user.model");
