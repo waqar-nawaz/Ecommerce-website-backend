@@ -22,7 +22,7 @@ exports.uploadImage = async (imagePath) => {
 
     // Remove the local file after upload
     fs.unlinkSync(imagePath);
-    console.log("Image URL from Cloudinary:", uploadResult);
+    // console.log("Image URL from Cloudinary:", uploadResult);
 
     // Return the secure URL of the uploaded image and its public ID for future deletion
     return { url: uploadResult.secure_url, public_id: uploadResult.public_id };
