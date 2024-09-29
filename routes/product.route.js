@@ -11,6 +11,7 @@ route.post(
   validateRequest(productsSchema),
   prodcutController.addProduct
 );
-route.get("/product", isAuth, prodcutController.getProduct);
+route.get("/product", prodcutController.getProduct);
+route.get("/product/:id", prodcutController.getProductById);
 
 module.exports = route;

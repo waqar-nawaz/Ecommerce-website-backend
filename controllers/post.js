@@ -50,7 +50,7 @@ exports.createPost = async (req, res, next) => {
     }
 
     // Await the cloudinary upload result
-    const uploadResult = await uploadImage(file);
+    const uploadResult = await uploadImage(file, "Post");
 
     if (!uploadResult) {
       return res.status(500).json({ message: "Failed to upload image" });
@@ -100,7 +100,7 @@ exports.updatePost = async (req, res, next) => {
     }
 
     if (req.file) {
-      const uploadResult = await uploadImage(file);
+      const uploadResult = await uploadImage(file, "Post");
       imagePublicId = uploadResult.public_id;
       file = uploadResult.url;
     }

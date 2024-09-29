@@ -4,12 +4,12 @@ const postController = require("../controllers/post");
 const prodcutController = require("../controllers/prodcut.controller");
 const isAuth = require("../middleware/is-auth");
 const validateRequest = require("../middleware/validateRequest");
-const productSchema = require("../validation.Schemas/product.shcema");
+const postSchema = require("../validation.Schemas/post.shcema");
 
 route.post(
   "/post",
   isAuth,
-  validateRequest(productSchema),
+  validateRequest(postSchema),
   postController.createPost
 );
 route.put("/post/:id", isAuth, postController.updatePost);

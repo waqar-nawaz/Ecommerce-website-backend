@@ -4,7 +4,7 @@ const fs = require("fs");
 const { v4: uuidv4 } = require("uuid"); // Use UUID for unique IDs
 
 // Cloudinary Upload Function
-exports.uploadImage = async (imagePath) => {
+exports.uploadImage = async (imagePath, folder) => {
   // Configuration
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,
@@ -17,7 +17,7 @@ exports.uploadImage = async (imagePath) => {
 
     const uploadResult = await cloudinary.uploader.upload(imagePath, {
       public_id: uniquePublicId, // Use unique ID
-      folder: "Products",
+      folder: folder,
     });
 
     // Remove the local file after upload
