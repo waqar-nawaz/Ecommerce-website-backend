@@ -13,7 +13,7 @@ exports.uploadImage = async (imagePath, folder) => {
   });
 
   try {
-    const uniquePublicId = `product_${uuidv4()}`; // Generate a unique ID for each image
+    const uniquePublicId = `${folder}_${uuidv4()}`; // Generate a unique ID for each image
 
     const uploadResult = await cloudinary.uploader.upload(imagePath, {
       public_id: uniquePublicId, // Use unique ID

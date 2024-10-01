@@ -10,7 +10,11 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  category: { type: String, required: true }, // Reference to Category
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+    required: true,
+  }, // Reference to Category
   brand: { type: String, required: true }, // Reference to Brand
   sku: { type: String }, // Unique identifier for this product variant
   ratings: { type: Number, default: 0 },

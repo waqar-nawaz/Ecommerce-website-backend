@@ -61,7 +61,7 @@ exports.addProduct = async (req, res, next) => {
 exports.getProduct = async (req, res, next) => {
   try {
     const result = await product.find().select("-imagePublicId -__v").populate({
-      path: "creater", // Field to populate
+      path: "creater category", // Field to populate
       select: "-post -password -product -createdAt -updatedAt -__v",
     });
     return res.status(200).json({ message: "Fetch successfully", result });
@@ -74,7 +74,9 @@ exports.getProductById = async (req, res, next) => {
   const id = req.params.id;
 
   try {
-    const result = await product.findById(id);
+    const result = await product.findById(id).populate({
+      path: "category",
+    });
     if (!result) {
       throw new Error("Product not found");
     }
