@@ -59,15 +59,17 @@ exports.addProduct = async (req, res, next) => {
 };
 
 exports.getProduct = async (req, res, next) => {
-  const id = req.query.categoryId;
+  const categoryId = req.query.categoryId;
+  const query = categoryId ? { category: categoryId } : {};
 
   try {
     const result = await product
-      .find({ category: id })
+      .find(query)
       .select("-imagePublicId -__v")
       .populate({
         path: "creater category", // Field to populate
-        select: "-post -password -product -createdAt -updatedAt -__v",
+        select:
+          "-post -password -imageUrl -imagePublicId -product -createdAt -updatedAt -__v",
       });
     return res.status(200).json({ message: "Fetch successfully", result });
   } catch (error) {
