@@ -1,5 +1,4 @@
 const Category = require("../models/category.model");
-const clearImage = require("../utils/clearImage");
 const { uploadImage } = require("../utils/cloudinary");
 const io = require("../socket.io");
 

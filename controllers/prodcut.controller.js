@@ -1,7 +1,7 @@
 const product = require("../models/product.model");
 const User = require("../models/user.model");
 const clearImage = require("../utils/clearImage");
-const { uploadImage } = require("../utils/cloudinary");
+const { uploadImage, deleteImage } = require("../utils/cloudinary");
 const io = require("../socket.io");
 
 exports.addProduct = async (req, res, next) => {
@@ -59,11 +59,16 @@ exports.addProduct = async (req, res, next) => {
 };
 
 exports.getProduct = async (req, res, next) => {
+  const id = req.query.categoryId;
+
   try {
-    const result = await product.find().select("-imagePublicId -__v").populate({
-      path: "creater category", // Field to populate
-      select: "-post -password -product -createdAt -updatedAt -__v",
-    });
+    const result = await product
+      .find({ category: id })
+      .select("-imagePublicId -__v")
+      .populate({
+        path: "creater category", // Field to populate
+        select: "-post -password -product -createdAt -updatedAt -__v",
+      });
     return res.status(200).json({ message: "Fetch successfully", result });
   } catch (error) {
     next(error);
@@ -137,7 +142,8 @@ exports.deleteProduct = async (req, res, next) => {
       return post;
     })
     .then((post) => {
-      clearImage(post.imageUrl);
+      // console.log(post.imagePublicId);
+      deleteImage(post.imagePublicId);
       return res.status(200).json({ message: "Product deleted successfully" });
     })
     .catch((err) => {
