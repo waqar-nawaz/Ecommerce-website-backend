@@ -1,3 +1,4 @@
+const { string } = require("joi");
 const mongoose = require("mongoose");
 
 const CartItemSchema = new mongoose.Schema(
@@ -21,7 +22,7 @@ const CartItemSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { _id: false, timestamps: true }
 );
 
 const CartSchema = new mongoose.Schema({
@@ -34,6 +35,12 @@ const CartSchema = new mongoose.Schema({
   totalPrice: {
     type: Number,
     default: 0,
+  },
+  status: {
+    type: String,
+    default: "Pending",
+    enum: ["Pending", "Delivered", "Cancelled"],
+    required: true,
   },
   createdAt: {
     type: Date,

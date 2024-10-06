@@ -6,6 +6,7 @@ const isAuth = require("../middleware/is-auth");
 const productsSchema = require("../validation.Schemas/products.schema");
 const validateRequest = require("../middleware/validateRequest");
 const categoryController = require("../controllers/category.controller");
+const cartRoute = require("../routes/cart.route");
 
 route.post(
   "/product",
@@ -24,5 +25,8 @@ route.get("/category", categoryController.getCategory);
 route.get("/category/:id", categoryController.getCategoryById);
 route.put("/category/:id", isAuth, categoryController.updateCategory);
 route.delete("/category/:id", isAuth, categoryController.deleteCategory);
+
+// cart route set
+route.use("/cart", cartRoute);
 
 module.exports = route;
