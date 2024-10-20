@@ -1,57 +1,34 @@
-const { string } = require("joi");
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const CartItemSchema = new mongoose.Schema(
-  {
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "ProductModel", // Reference to the Product model
-      required: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1, // Ensure at least one item
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
-    total: {
-      type: Number,
-      required: true,
-    },
-  },
-  { _id: false, timestamps: true }
-);
-
-const CartSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Reference to the User model
+const CartItemSchema = new Schema({
+  product: {
+    type: Schema.Types.ObjectId,
+    ref: "ProductModel",
     required: true,
   },
-  items: [CartItemSchema], // Array of cart items
-  totalPrice: {
+  quantity: {
     type: Number,
-    default: 0,
-  },
-  status: {
-    type: String,
-    default: "Pending",
-    enum: ["Pending", "Delivered", "Cancelled"],
     required: true,
+    min: 1, // Ensure quantity is always at least 1
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+  _id: false, // Remove the default "_id" field that Mongoose adds
 });
 
-const Cart = mongoose.model("Cart", CartSchema);
+const CartSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      unique: true, // Ensure one cart per user
+    },
+    items: [CartItemSchema],
+  },
+  {
+    timestamps: true, // Automatically create `createdAt` and `updatedAt` fields
+  }
+);
 
+const Cart = mongoose.model("Cart", CartSchema);
 module.exports = Cart;
