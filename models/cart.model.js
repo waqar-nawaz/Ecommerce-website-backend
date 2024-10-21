@@ -1,3 +1,4 @@
+const { number } = require("joi");
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
@@ -11,6 +12,9 @@ const CartItemSchema = new Schema({
     type: Number,
     required: true,
     min: 1, // Ensure quantity is always at least 1
+  },
+  total: {
+    type: Number,
   },
   _id: false, // Remove the default "_id" field that Mongoose adds
 });

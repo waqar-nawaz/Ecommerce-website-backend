@@ -1,4 +1,5 @@
 const cartModel = require("../models/cart.model");
+const productModel = require("../models/product.model");
 
 exports.addCart = async (req, res, next) => {
   const { userId, productId, quantity } = req.body;
@@ -9,13 +10,19 @@ exports.addCart = async (req, res, next) => {
   }
 
   try {
-    const product = cart.items.findIndex((items) => {
+    const productIndex = cart.items.findIndex((items) => {
       return items.product.toString() == productId;
     });
-    if (product > -1) {
+
+    if (productIndex > -1) {
       return res.status(200).json({ message: "Product Already in The Cart" });
     } else {
-      cart.items.push({ product: productId, quantity: quantity });
+      const product = await productModel.findById(productId); // Get product details to calculate total
+      cart.items.push({
+        product: productId,
+        quantity: quantity,
+        total: quantity * product.price, // Calculate total based on the product price
+      });
     }
 
     await cart.save();
@@ -29,7 +36,7 @@ exports.addCart = async (req, res, next) => {
 
 exports.getCart = async (req, res, next) => {
   const userId = req.params.userId;
-  console.log(`Fetching cart for user: ${userId}`);
+  // console.log(`Fetching cart for user: ${userId}`);
 
   try {
     // Find the cart for the given userId
