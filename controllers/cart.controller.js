@@ -15,7 +15,7 @@ exports.addCart = async (req, res, next) => {
     });
 
     if (productIndex > -1) {
-      return res.status(200).json({ message: "Product Already in The Cart" });
+      return res.status(400).json({ message: "Product Already in The Cart" });
     } else {
       const product = await productModel.findById(productId); // Get product details to calculate total
       cart.items.push({
@@ -80,7 +80,9 @@ exports.updateCart = async (req, res, next) => {
   }
 
   if (product > -1) {
+    const productObject = await productModel.findById(productId);
     cart.items[product].quantity = quantity;
+    cart.items[product].total = quantity * productObject.price;
     await cart.save();
     return res.status(200).json({ message: "Cart updated successfully" });
   }
