@@ -50,7 +50,7 @@ exports.getCart = async (req, res, next) => {
       .select("-__v");
     // If no cart is found, send a response indicating so
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      return res.status(200).json({ message: "Cart is Empty!" });
     }
 
     // Return the cart data if found

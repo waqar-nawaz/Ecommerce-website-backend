@@ -20,6 +20,10 @@ exports.singup = async (req, res, next) => {
       password: hashedPassword,
       status,
     });
+
+    delete result._doc["password"];
+    delete result._doc["post"];
+    delete result._doc["product"];
     return res
       .status(201)
       .json({ message: "User created successfully", result });
@@ -56,4 +60,28 @@ exports.login = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+exports.updateUser = async (req, res, next) => {
+  const { name, email, status, role } = req.body;
+  const userId = req.params.userId;
+  let data = {
+    name,
+    email,
+    status,
+    role,
+  };
+  const user = await User.findByIdAndUpdate(userId, data, { new: true });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  delete user._doc["password"];
+  delete user._doc["post"];
+  delete user._doc["product"];
+  return res.status(200).json({ message: "User updated successfully", user });
+};
+
+exports.getUsers = async (req, res, next) => {
+  const users = await User.find().select("-password -post -product");
+  return res.status(200).json({ users });
 };
