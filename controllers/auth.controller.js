@@ -1,6 +1,8 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Cart = require("../models/cart.model");
+
 require("dotenv").config();
 
 exports.singup = async (req, res, next) => {
@@ -63,12 +65,11 @@ exports.login = async (req, res, next) => {
 };
 
 exports.updateUser = async (req, res, next) => {
-  const { name, email, status, role } = req.body;
+  const { name, email, role } = req.body;
   const userId = req.params.userId;
   let data = {
     name,
     email,
-    status,
     role,
   };
   const user = await User.findByIdAndUpdate(userId, data, { new: true });
@@ -83,5 +84,28 @@ exports.updateUser = async (req, res, next) => {
 
 exports.getUsers = async (req, res, next) => {
   const users = await User.find().select("-password -post -product");
-  return res.status(200).json({ users });
+  return res.status(200).json(users);
+};
+
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+
+    // Find the cart by userId instead of using findById
+    const cart = await Cart.findOne({ userId }); // Corrected here
+    if (cart) {
+      await Cart.findByIdAndDelete(cart._id);
+    }
+
+    // Delete the user by userId
+    const user = await User.findByIdAndDelete(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    next(error); // Pass any errors to the error-handling middleware
+  }
 };
