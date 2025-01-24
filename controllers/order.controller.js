@@ -44,7 +44,8 @@ exports.getOrders = async (req, res, next) => {
   const userId = req.userId;
 
   try {
-    const order = await Order.findOne({ userId })
+    const order = await Order.find({ userId })
+
       .populate({
         path: "items.product", // Populate the `product` field in each item
         select: "name description price stock imageUrl brand -_id", // Specify fields to select from `Product`

@@ -57,6 +57,7 @@ exports.login = async (req, res, next) => {
     let token = jwt.sign({ user }, process.env.JWT_SECRET, {
       expiresIn: "24h",
     });
+
     delete user._doc["password"];
     return res.status(200).json({ message: "Login successfully", user, token });
   } catch (error) {

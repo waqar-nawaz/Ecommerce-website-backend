@@ -1,16 +1,13 @@
 const express = require("express");
 const app = express();
-const routes = require("./routes/post");
 const bodyParser = require("body-parser");
 require("dotenv").config();
 const mongoose = require("mongoose");
 const path = require("path");
 const upload = require("./utils/imageUpload");
 const cors = require("cors");
-const authroute = require("./routes/auth.route");
-const productroute = require("./routes/product.route");
+const routes = require("./routes/index");
 
-const socket = require("./socket.io");
 
 // CORS Middleware
 app.use(cors());
@@ -23,9 +20,7 @@ app.use(upload.single("imageUrl"));
 app.use(bodyParser.json());
 
 // Routes
-app.use("/api", productroute);
-app.use("/feed", routes);
-app.use("/auth", authroute);
+app.use("/api/v1", routes);
 
 // Static Files Middleware
 app.use("/images", express.static(path.join(__dirname, "images")));
