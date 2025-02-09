@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Cart = require("../models/cart.model");
+const { OAuth2Client } = require("google-auth-library");
 
 require("dotenv").config();
 
@@ -108,5 +109,54 @@ exports.deleteUser = async (req, res, next) => {
     return res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     next(error); // Pass any errors to the error-handling middleware
+  }
+};
+
+
+
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);  // Make sure this is your Google Client ID
+
+exports.googleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+
+    // Verify the Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID, // Ensure this is the correct Client ID
+    });
+
+
+    if (!ticket) {
+      return res.status(401).json({ error: "Invalid Google token" });
+    }
+
+    const { sub: googleId, name, email } = ticket.getPayload();
+
+
+    // Check if the user exists in the database
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // If the user doesn't exist, create a new user
+      user = new User({ name, email, password: null, googleId });
+      await user.save();
+    }
+
+    // Generate JWT token for the session
+    const token = jwt.sign({ user }, process.env.JWT_SECRET, {
+      expiresIn: "24h", // Set token expiration (adjust as needed)
+    });
+
+    // Return the token and user data to the frontend
+    return res.status(200).json({
+      message: "Login successfully",
+      user,
+      token,
+    });
+  } catch (error) {
+    next(error)
   }
 };

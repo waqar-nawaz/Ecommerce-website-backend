@@ -7,9 +7,14 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    googleId: {
+      type: String,
+      // required: true,
+      unique: true, // Ensure each Google ID is unique
+    },
     password: {
       type: String,
-      required: true,
+      // required: true,
     },
     name: {
       type: String,

@@ -9,5 +9,7 @@ route.post("/login", authController.login);
 route.get("/user", authController.getUsers);
 route.put("/user/:userId", authController.updateUser);
 route.delete("/user/:userId", authController.deleteUser);
+route.post("/google", authController.googleLogin);
+
 
 module.exports = route;

@@ -13,6 +13,7 @@ const routes = require("./routes/index");
 app.use(cors());
 app.options("*", cors()); // Handle preflight CORS requests
 
+
 // Multer Middleware for handling file uploads (put this before bodyParser)
 app.use(upload.single("imageUrl"));
 
