@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Cart = require("../models/cart.model");
 const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);  // Make sure this is your Google Client ID
+
 
 require("dotenv").config();
 
@@ -17,19 +19,29 @@ exports.singup = async (req, res, next) => {
     // Hash the password before saving it to the database
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const result = await User.create({
+    const user = await User.create({
       name,
       email,
       password: hashedPassword,
       status,
+      imageUrl: null
     });
 
-    delete result._doc["password"];
-    delete result._doc["post"];
-    delete result._doc["product"];
-    return res
-      .status(201)
-      .json({ message: "User created successfully", result });
+    delete user._doc["password"];
+    delete user._doc["post"];
+    delete user._doc["product"];
+
+    // Generate JWT token for the session
+    const token = jwt.sign({ user }, process.env.JWT_SECRET, {
+      expiresIn: "24h", // Set token expiration (adjust as needed)
+    });
+
+    // Return the token and user data to the frontend
+    return res.status(200).json({
+      message: "User created successfully",
+      user,
+      token,
+    });
   } catch (error) {
     if (error.name === "ValidationError") {
       return res.status(400).json({ message: error.message });
@@ -115,7 +127,6 @@ exports.deleteUser = async (req, res, next) => {
 
 
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);  // Make sure this is your Google Client ID
 
 exports.googleLogin = async (req, res) => {
   try {
@@ -133,7 +144,7 @@ exports.googleLogin = async (req, res) => {
       return res.status(401).json({ error: "Invalid Google token" });
     }
 
-    const { sub: googleId, name, email } = ticket.getPayload();
+    const { sub: googleId, name, email, picture } = ticket.getPayload();
 
 
     // Check if the user exists in the database
@@ -141,7 +152,7 @@ exports.googleLogin = async (req, res) => {
 
     if (!user) {
       // If the user doesn't exist, create a new user
-      user = new User({ name, email, password: null, googleId });
+      user = new User({ name, email, password: null, googleId, imageUrl: picture });
       await user.save();
     }
 

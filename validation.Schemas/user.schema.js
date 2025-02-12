@@ -6,14 +6,13 @@ const userSchema = Joi.object({
     "string.empty": "Email is required",
   }),
 
-  // password: Joi.string().min(6).optional().messages({
-  //   "string.min": "Password should have at least 6 characters",
-  //   "string.empty": "Password is required",
-  // }),
+  password: Joi.string().min(6).optional().messages({
+    "string.min": "Password should have at least 6 characters",
+    "string.empty": "Password is required",
+  }),
 
-  name: Joi.string().min(3).required().messages({
+  name: Joi.string().min(3).optional().messages({
     "string.min": "Name should have at least 3 characters",
-    "string.empty": "Name is required",
   }),
 
   post: Joi.array()
